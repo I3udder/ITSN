@@ -13,7 +13,7 @@ $time = get-date -format yyyyMMdd-HHmmss
 $password = convertto-securestring -String $Switch.pass -AsPlainText -force
 $credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Switch.user,$password
 
-$session = New-SSHSession -ComputerName $Switch.ipaddress -Credential $credentials
+$session = New-SSHSession -ComputerName $Switch.ipaddress -Credential $credentials -AcceptKey
 $stream = $session.Session.CreateShellStream("dumb", 0, 0, 0, 0, 1000)
 $stream.Write("copy run scp://cisco:cisco@172.16.50.101/"+ $Switch.hostname  +"-" + $time + ".conf`n")
 #Cisco Catalyst Switches require 3 enters
