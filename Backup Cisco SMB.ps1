@@ -15,7 +15,7 @@ $credentials = new-object -typename System.Management.Automation.PSCredential -a
 
 $session = New-SSHSession -ComputerName $Switch.ipaddress -Credential $credentials -AcceptKey
 $stream = $session.Session.CreateShellStream("dumb", 0, 0, 0, 0, 1000)
-$stream.Write("copy run scp://cisco:cisco@172.16.50.101/"+ $Switch.hostname  +"-" + $time + ".conf`n")
+$stream.Write("copy run scp://"+ $Switch.scpuser +":"+ $Switch.scppass +"@vpn.itsn.nl/"+ $Switch.hostname  +"-" + $time + ".conf`n")
 #Cisco Catalyst Switches require 3 enters
 #Start-Sleep -s 5
 #$stream.Write("`n")
