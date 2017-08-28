@@ -1,2 +1,2 @@
 hostname,ipaddress,user,pass,scpuser,scppass
-itsnveasw10,192.168.32.17,cisco,cisco,cisco,cisco
+switch,192.168.32.17,cisco,cisco,cisco,cisco
