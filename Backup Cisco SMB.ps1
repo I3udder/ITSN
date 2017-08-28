@@ -11,8 +11,12 @@ $path = "C:\<Backup DIR>\Switch-Backup-" + $time + ".txt"
 Start-Transcript -Path $path -NoClobber
 
 If ( ! (Get-module Posh-SSH )) { 
-
-iex (New-Object Net.WebClient).DownloadString("https://gist.github.com/darkoperator/6152630/raw/c67de4f7cd780ba367cccbc2593f38d18ce6df89/instposhsshdev")
+  If ( ! (Get-Module PsGet)) {
+   iex (New-Object Net.WebClient).DownloadString("https://gist.github.com/darkoperator/6152630/raw/c67de4f7cd780ba367cccbc2593f38d18ce6df89/instposhsshdev")
+   }
+  else {
+    Install-Module Posh-SSH
+   }
 
 }
 
