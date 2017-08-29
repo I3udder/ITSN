@@ -35,7 +35,7 @@ ForEach ($File in $Files) {
      $compare | Out-File $TempFile
      $Subject = "Change found in "+ $File.name
      $Body = "For complete changelog see attachement. We compared "+ $File.name +" and "+ $file2.name
-     Send-MailMessage -From $From -To $To -Subject $Subject -Body $Body -Attachments $TempFile -dno onSuccess, onFailure -SmtpServer $SMTPServer
+     Send-MailMessage -From $From -To $To -Subject $Subject -Body $Body -Attachments $TempFile -dno onFailure -SmtpServer $SMTPServer
      Remove-Item $TempFile
    }
    Write-Output "Finished"
