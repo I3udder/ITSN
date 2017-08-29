@@ -17,11 +17,11 @@ $path = "C:\SSH-Root\Backup\Switch-Backup-" + $time + ".txt"
 Start-Transcript -Path $path -NoClobber
  
 #----- get files based on lastwrite filter and specified folder ---#
-$Files = Get-Childitem $TargetFolder -Include $Extension -Recurse | Where {$_.LastWriteTime -le "$LastWrite"}
+$Files = Get-Childitem $TargetFolder -Include $Extension -Recurse | Where-Object {$_.LastWriteTime -le "$LastWrite"}
  
 foreach ($File in $Files) 
     {
-    if ($File -ne $NULL)
+    if ($NULL -ne $File)
         {
 		$Output = "Deleting File "+ $File
         Write-Output $Output
