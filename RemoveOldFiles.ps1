@@ -23,12 +23,12 @@ foreach ($File in $Files)
     {
     if ($File -ne $NULL)
         {
-        write-host "Deleting File $File `r`n"
+        Write-Output "Deleting File $File `r`n"
         Remove-Item $File.FullName | out-null
         }
     else
         {
-        Write-Host "No more files to delete! `r`n"
+        Write-Output "No more files to delete! `r`n"
         }
     }
 

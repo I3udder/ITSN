@@ -22,7 +22,7 @@ If ( ! (Get-module Posh-SSH )) {
 
 ForEach ($Switch in $Switches) {
 
-Write-Host "Backup of" $Switch.hostname "Started`r`n"
+Write-Output "Backup of" $Switch.hostname "Started`r`n"
 
 $password = convertto-securestring -String $Switch.pass -AsPlainText -force
 $credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Switch.user,$password
@@ -39,6 +39,6 @@ Start-Sleep -s 5
 $stream.Write("`n")
 Start-Sleep -s 30
 Remove-SSHSession $session
-Write-Host "Backup of" $Switch.hostname "Finished`r`n"
+Write-Output "Backup of" $Switch.hostname "Finished`r`n"
 }
 Stop-Transcript 
