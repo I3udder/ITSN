@@ -23,12 +23,14 @@ foreach ($File in $Files)
     {
     if ($File -ne $NULL)
         {
-        Write-Output "Deleting File $File `r`n"
+		$Output = "Deleting File "+ $File
+        Write-Output $Output
         Remove-Item $File.FullName | out-null
         }
     else
         {
-        Write-Output "No more files to delete! `r`n"
+		$Output = "No more files to delete!"
+        Write-Output $Output
         }
     }
 
