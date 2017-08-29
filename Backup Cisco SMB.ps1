@@ -5,6 +5,7 @@
 $Switches = Import-Csv sample.csv
 $time = get-date -format yyyyMMdd-HHmmss
 $path = "C:\<Backup DIR>\Switch-Backup-" + $time + ".txt"
+$Host = "<FQDN or IP of backup server>"
 Start-Transcript -Path $path -NoClobber
 
 import-module Posh-SSH
@@ -22,26 +23,27 @@ If ( ! (Get-module Posh-SSH )) {
 
 ForEach ($Switch in $Switches) {
 
-$Output = "Backup of "+ $Switch.hostname +" Started"
-Write-Output $Output
+  $Output = "Backup of "+ $Switch.hostname +" Started"
+  Write-Output $Output
 
-$password = convertto-securestring -String $Switch.pass -AsPlainText -force
-$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Switch.user,$password
+  $password = convertto-securestring -String $Switch.pass -AsPlainText -force
+  $credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Switch.user,$password
 
-$session = New-SSHSession -ComputerName $Switch.ipaddress -Credential $credentials -AcceptKey
-$stream = $session.Session.CreateShellStream("dumb", 0, 0, 0, 0, 1000)
-$stream.Write("copy run scp://"+ $Switch.scpuser +":"+ $Switch.scppass +"@<Host FQDN or IP>/"+ $Switch.hostname  +"-" + $time + ".conf`n")
-#Cisco Catalyst Switches require 3 enters
-Start-Sleep -s 5
-$stream.Write("`n")
-Start-Sleep -s 5
-$stream.Write("`n")
-Start-Sleep -s 5
-$stream.Write("`n")
-Start-Sleep -s 30
-Remove-SSHSession $session | Out-Null
+  $session = New-SSHSession -ComputerName $Switch.ipaddress -Credential $credentials -AcceptKey
+  $stream = $session.Session.CreateShellStream("dumb", 0, 0, 0, 0, 1000)
+  $stream.Write("copy run scp://"+ $Switch.scpuser +":"+ $Switch.scppass +"@"+ $host +"/"+ $Switch.hostname  +"-" + $time + ".conf`n")
+  #Cisco Catalyst Switches require 3 enters
+  Start-Sleep -s 5
+  $stream.Write("`n")
+  Start-Sleep -s 5
+  $stream.Write("`n")
+  Start-Sleep -s 5
+  $stream.Write("`n")
+  Start-Sleep -s 30
+  Remove-SSHSession $session | Out-Null
 
-$Output = "Backup of "+ $Switch.hostname +" Finished"
-Write-Output $Output
+  $Output = "Backup of "+ $Switch.hostname +" Finished"
+  Write-Output $Output
 }
+
 Stop-Transcript 
