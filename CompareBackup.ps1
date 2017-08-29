@@ -16,6 +16,7 @@ ForEach ($File in $Files) {
  #Write-Host $File.name.Substring(0,$File.name.Length-21)
  #When used with the Backup Cisco SMB script the last 21 characters are the extension and the date/time notification
  $Filename = $File.name.Substring(0,$File.name.Length-21) +"-"+ $timeYesterday
+ #Create search query
  $Include = ""
  $Include += $Filename
  $Include += $Extension
