@@ -7,10 +7,11 @@ $path = "C:\SSH-root\Backup\Compare-" + $time + ".txt"
 $From = "<email address>"
 $To = "<Email Address>"
 $SMTPServer = "<Mail-Server>"
+$Hours = "4"
 
 Start-Transcript -Path $path -NoClobber
 
-$Files = get-childitem $TargetFolder -Recurse -include $Extension | Where-Object { $_.LastWriteTime -gt (get-date).AddHours(-4)}
+$Files = get-childitem $TargetFolder -Recurse -include $Extension | Where-Object { $_.LastWriteTime -gt (get-date).AddHours(-$Hours)}
 
 ForEach ($File in $Files) {
  #Write-Host $File.name.Substring(0,$File.name.Length-21)
