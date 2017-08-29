@@ -39,7 +39,7 @@ $stream.Write("`n")
 Start-Sleep -s 5
 $stream.Write("`n")
 Start-Sleep -s 30
-Remove-SSHSession $session
+Remove-SSHSession $session | Out-Null
 
 $Output = "Backup of "+ $Switch.hostname +" Finished"
 Write-Output $Output
