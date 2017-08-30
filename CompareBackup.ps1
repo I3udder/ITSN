@@ -26,7 +26,7 @@ ForEach ($File in $Files) {
  ForEach ($File2 in $Files2) {
    $Output = $File2.FullName +" "+ $File.Fullname
    Write-Output $Output
-   $Compare = Compare-Object $(Get-Content $File.FullName) $(Get-Content $File2.FullName)
+   $Compare = Compare-Object $(Get-Content $File.FullName) $(Get-Content $File2.FullName) | Where-Object {$_.InputObject -notlike "ntp clock-period*"}
    If (!($compare)) {
      Write-Output "No changes found"
      }
