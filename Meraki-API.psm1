@@ -480,7 +480,7 @@ function New-MerakiNetwork {
 
     $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
     $endpoint = $shard.Substring(8,4)
-
+    $ConvertedType = $Type.ToLower()
 if (!$tags){
 
 $json = @"
@@ -488,7 +488,7 @@ $json = @"
 
 {
 "name":"$new_name",
-"type": "$Type",
+"type": "$ConvertedType",
 "tags": "",
 "timeZone": "Europe/Amsterdam"
 }
@@ -502,7 +502,7 @@ $json = @"
 
 {
 "name":"$new_name",
-"type":  "$Type",
+"type":  "$ConvertedType",
 "tags": "$tags"
 "timeZone": "Europe/Amsterdam"
 }
@@ -526,9 +526,7 @@ $json = @"
 
     $api.url = "/organizations/"+ $OrganizationID +"/networks"
     $uri = $api.endpoint + $api.url
-    #Write-Output $json
-    #$request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
-    $request = Invoke-RestMethod -Uri $uri -Body $json -Headers $header -Method Post -Verbose
+    $request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
     return $request
 
 }
