@@ -351,7 +351,7 @@ $json = @"
 
     $api.url = "/organizations/"+ $OrganizationID +"/clone"
     $uri = $api.endpoint + $api.url
-    Write-Output $uri
+    #Write-Output $uri
     $request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
     return $request
 
@@ -386,3 +386,149 @@ function Get-MerakiSSID {
 
 }
  
+ Function Set-MerakiOrganization {
+
+
+Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,
+        [Parameter(Mandatory=$true)]
+        [String]$new_name
+
+    )
+
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+
+$json = @"
+
+
+{
+"id": $OrganizationID,
+"name":"$new_name"
+}
+
+"@
+
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+    }
+
+    $api.url = "/organizations/"+ $OrganizationID
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method Put -Uri $uri -Headers $header -Body $json -Verbose
+    return $request
+
+} 
+
+function Get-MerakiInventory {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
+
+    $api = @{
+
+        "endpoint" = 'https://dashboard.meraki.com/api/v0'
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api.url = "/organizations/"+ $OrganizationID +"/inventory"
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+    return $request
+
+}
+
+function New-MerakiNetwork {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,
+        [Parameter(Mandatory=$true)]
+        [String]$Type,
+        [Parameter(Mandatory=$true)]
+        [String]$new_name,
+        [Parameter(Mandatory=$false)]
+        [String]$tags
+
+    )
+
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+
+if (!$tags){
+
+$json = @"
+
+
+{
+"name":"$new_name",
+"type": "$Type",
+"tags": "",
+"timeZone": "Europe/Amsterdam"
+}
+
+"@
+}
+else {
+
+$json = @"
+
+
+{
+"name":"$new_name",
+"type":  "$Type",
+"tags": "$tags"
+"timeZone": "Europe/Amsterdam"
+}
+
+"@
+
+}
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api.url = "/organizations/"+ $OrganizationID +"/networks"
+    $uri = $api.endpoint + $api.url
+    #Write-Output $json
+    #$request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
+    $request = Invoke-RestMethod -Uri $uri -Body $json -Headers $header -Method Post -Verbose
+    return $request
+
+}
