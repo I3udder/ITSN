@@ -1,9 +1,11 @@
-﻿#Insert your API key here
+﻿function Get-MerakiSwitches {
 
-#$api_key = 'INSERT_API_KEY_HERE'
-
-
-function Get-MerakiSwitches ($api_key, $networkid) {
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$NetworkID
+    )
 
     $header = @{
         
@@ -24,7 +26,14 @@ function Get-MerakiSwitches ($api_key, $networkid) {
 
 }
 
-function Get-MerakiAPs ($api_key, $networkid) {
+function Get-MerakiAPs {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$NetworkID
+    )
 
     $api = @{
 
@@ -46,7 +55,14 @@ function Get-MerakiAPs ($api_key, $networkid) {
 
 }
 
-function Get-MerakiAppliances ($api_key, $networkid) {
+function Get-MerakiAppliances {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$NetworkID
+    )
 
     $api = @{
 
@@ -68,7 +84,14 @@ function Get-MerakiAppliances ($api_key, $networkid) {
 
 }
 
-function Get-MerakiVPN ($api_key, $OrganizationID) {
+function Get-MerakiVPN {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
 
     $api = @{
 
@@ -90,7 +113,14 @@ function Get-MerakiVPN ($api_key, $OrganizationID) {
 
 }
 
-function Get-MerakiNetworks ($api_key, $OrganizationID) {
+function Get-MerakiNetworks {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
 
     $api = @{
 
@@ -112,7 +142,12 @@ function Get-MerakiNetworks ($api_key, $OrganizationID) {
 
 }
 
-function Get-MerakiOrganizations ($api_key) {
+function Get-MerakiOrganizations {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key
+    )
 
     $api = @{
 
@@ -134,7 +169,17 @@ function Get-MerakiOrganizations ($api_key) {
 
 }
 
-function Get-MerakiSwitchPorts ($api_key, $networkid, $switch_name) {
+function Get-MerakiSwitchPorts {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$networkid,
+        [Parameter(Mandatory=$true)]
+        [String]$switch_name
+    )
+
 
     #Useage: Get-MerakiSwitchPorts "SW01"
 
@@ -168,3 +213,176 @@ function Get-MerakiSwitchPorts ($api_key, $networkid, $switch_name) {
     }
 
 }
+
+Function Get-MerakiRedirectedUrl  {
+ 
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
+
+    $url = "https://dashboard.meraki.com/api/v0/organizations/"+ $OrganizationID +"/networks"
+    $request = [System.Net.WebRequest]::Create($url)
+    $request.Method = "GET"
+    $request.ContentType = "application/json"
+    $request.Headers.Add("X-Cisco-Meraki-API-Key",$api_key);
+    $request.AllowAutoRedirect=$False
+    $response=$request.GetResponse()
+ 
+    If ($response.StatusCode -eq "Found")
+    {
+        $response.GetResponseHeader("Location")
+    }
+}
+
+ function New-MerakiOrganization {
+
+   Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,
+        [Parameter(Mandatory=$true)]
+        [String]$new_name
+
+    )
+
+$shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+$endpoint = $shard.Substring(8,4)
+
+$json = @"
+
+
+{
+"name":"$new_name"
+}
+
+"@
+
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+    }
+
+    $api.url = '/organizations'
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
+    return $request
+
+}  
+
+function Get-MerakiLicenseState {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
+
+    $api = @{
+
+        "endpoint" = 'https://dashboard.meraki.com/api/v0'
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api.url = "/organizations/"+ $OrganizationID +"/licenseState"
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+    return $request
+
+}
+
+function Copy-MerakiOrganization {
+
+   Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,
+        [Parameter(Mandatory=$true)]
+        [String]$new_name
+
+    )
+
+$shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+$endpoint = $shard.Substring(8,4)
+
+$json = @"
+
+
+{
+"name":"$new_name"
+}
+
+"@
+
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+    }
+
+    $api.url = "/organizations/"+ $OrganizationID +"/clone"
+    $uri = $api.endpoint + $api.url
+    Write-Output $uri
+    $request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
+    return $request
+
+}
+
+function Get-MerakiSSID {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$NetworkID
+    )
+
+    $api = @{
+
+        "endpoint" = 'https://dashboard.meraki.com/api/v0'
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api.url = "/networks/"+ $networkid +"/ssids"
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+    return $request
+
+}
+ 
