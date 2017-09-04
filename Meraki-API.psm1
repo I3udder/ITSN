@@ -245,12 +245,19 @@ Function Get-MerakiRedirectedUrl  {
         [Parameter(Mandatory=$true)]
         [String]$OrganizationID,
         [Parameter(Mandatory=$true)]
-        [String]$new_name
+        [String]$new_name,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID
 
     )
 
-$shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
-$endpoint = $shard.Substring(8,4)
+If (!$ServerID) {
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
 
 $json = @"
 
@@ -319,12 +326,19 @@ function Copy-MerakiOrganization {
         [Parameter(Mandatory=$true)]
         [String]$OrganizationID,
         [Parameter(Mandatory=$true)]
-        [String]$new_name
+        [String]$new_name,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID
 
     )
 
-$shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
-$endpoint = $shard.Substring(8,4)
+If (!$ServerID) {
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
 
 $json = @"
 
@@ -395,12 +409,19 @@ Param (
         [Parameter(Mandatory=$true)]
         [String]$OrganizationID,
         [Parameter(Mandatory=$true)]
-        [String]$new_name
+        [String]$new_name,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID
 
     )
 
+If (!$ServerID) {
     $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
     $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
 
 $json = @"
 
@@ -458,6 +479,7 @@ function Get-MerakiInventory {
     $api.url = "/organizations/"+ $OrganizationID +"/inventory"
     $uri = $api.endpoint + $api.url
     $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+    #Invoke-RestMethod -Method GET -Uri $uri -Headers $header | Out-File c:\temp\inventory.json
     return $request
 
 }
@@ -470,17 +492,27 @@ function New-MerakiNetwork {
         [Parameter(Mandatory=$true)]
         [String]$OrganizationID,
         [Parameter(Mandatory=$true)]
+        [ValidateSet("switch","wireless","appliance", IgnoreCase = $False)]
         [String]$Type,
         [Parameter(Mandatory=$true)]
         [String]$new_name,
         [Parameter(Mandatory=$false)]
-        [String]$tags
+        [String]$tags,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID
 
     )
 
+If (!$ServerID) {
     $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
     $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
+
     $ConvertedType = $Type.ToLower()
+
 if (!$tags){
 
 $json = @"
@@ -528,5 +560,229 @@ $json = @"
     $uri = $api.endpoint + $api.url
     $request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
     return $request
+
+}
+
+function New-MerakiLicense {
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("renew","addDevices", IgnoreCase = $False)]
+        [String]$licenseMode,
+        [Parameter(Mandatory=$false)]
+        [String]$order,
+        [Parameter(Mandatory=$false)]
+        [String]$licenseKey,
+        [Parameter(Mandatory=$false)]
+        [String]$serial
+
+    )
+
+If (!$ServerID) {
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
+
+if ($licenseKey){
+  if (!$licenseMode) {
+    $Warning = "Parameter licenseMode is required when adding licenseKey"
+    Write-Error $Warning
+    return
+    }
+  else{
+$json = @"
+{
+"licenseKey": "$licenseKey",
+"licenseMode": "$licenseMode"
+}
+"@
+    }
+}
+if ($order) {
+
+$json = @"
+{
+"order": "$order"
+}
+"@
+
+}
+
+if ($serial) {
+$json = @"
+{
+"serial": "$serial"
+}
+"@
+}
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'undefined'
+        
+    }
+
+    $api.url = "/organizations/"+ $OrganizationID +"/claim"
+    $uri = $api.endpoint + $api.url
+    Write-Output $json
+    $request = Invoke-RestMethod -Method Post -Uri $uri -Headers $header -Body $json -Verbose
+    return $request
+
+}
+
+function Set-MerakiSwitchPort {
+
+ <#
+  .SYNOPSIS
+  This function configures a switch port on a Meraki Switch
+  .DESCRIPTION
+  This function tries to get the serial number of the defined switch. With that serial number and the parameters supplied the command updates the switch port configuration.
+  #>
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,
+        [Parameter(Mandatory=$true)]
+        [String]$networkID,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID,
+        [Parameter(Mandatory=$True)]
+        [String]$switchName,
+        [Parameter(Mandatory=$True)]
+        [String]$PortNumber,
+        [Parameter(Mandatory=$False)]
+        [String]$Name,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$enabled,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$poeEnabled,
+        [Parameter(Mandatory=$False)]
+        [String]$tags,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("access","trunk", IgnoreCase=$false)]
+        [String]$type,
+        [Parameter(Mandatory=$false)]
+        [String]$vlan,
+        [Parameter(Mandatory=$false)]
+        [String]$voiceVlan,
+        [Parameter(Mandatory=$false)]
+        [String]$allowedVlans,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$isolationEnabled,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$rstpEnabled,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("disabled","Root guard","BPDU guard", IgnoreCase=$false)]
+        [String]$stpGuard
+    )
+
+If (!$ServerID) {
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
+
+$Object = New-Object PSObject
+
+if ($name) {
+ $Object | Add-Member NoteProperty name $Name
+}
+if ($tags) {
+ $Object | Add-Member NoteProperty tags $tags
+}
+if ($enabled -eq $true) {
+ $Object | Add-Member NoteProperty enabled $true
+} 
+if ($enabled -eq $false) {
+ $Object | Add-Member NoteProperty enabled $false
+}
+if ($type) {
+  $Object | Add-Member NoteProperty type $type
+}
+if ($vlan) {
+  $Object | Add-Member NoteProperty vlan $vlan
+}
+if ($voiceVlan) {
+  $Object | Add-Member NoteProperty voiceVlan $voiceVlan
+}
+if ($allowedVlans) {
+  $Object | Add-Member NoteProperty allowedVlans $allowedVlans
+}
+if ($poeEnabled -eq $true) {
+ $Object | Add-Member NoteProperty poeEnabled $true
+} 
+if ($poeEnabled -eq $false) {
+ $Object | Add-Member NoteProperty poeEnabled $false
+}
+if ($isolationEnabled -eq $true) {
+ $Object | Add-Member NoteProperty isolationEnabled $true
+} 
+if ($isolationEnabled -eq $false) {
+ $Object | Add-Member NoteProperty isolationEnabled $false
+}
+if ($rstpEnabled -eq $true) {
+ $Object | Add-Member NoteProperty rstpEnabled $true
+} 
+if ($rstpEnabled -eq $false) {
+ $Object | Add-Member NoteProperty rstEnabled $false
+}
+if ($stpGuard) {
+  $Object | Add-Member NoteProperty stpGuard $stpGuard
+}
+
+    $json = $Object | ConvertTo-Json
+    Write-Output $json
+
+$switch = Get-MerakiSwitches -api_key $api_key -networkid $networkid | where {$_.name -eq $switchName}
+
+if ($switch){ 
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api.url = "/devices/" + $switch.serial + "/switchPorts/"+ $PortNumber
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method Put -Uri $uri -Headers $header -Body $json -Verbose
+    return $request
+    }
+    else{
+
+        Write-Host "Switch doesn't exist." -ForegroundColor Red
+    
+    }
 
 }
