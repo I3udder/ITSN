@@ -486,6 +486,23 @@ function Get-MerakiInventory {
 
 function New-MerakiNetwork {
 
+ <#
+  .SYNOPSIS
+  This function adds a new network in an organization
+  .DESCRIPTION
+  This function adds a new network in an organization
+  .PARAMETER new_name
+  The name of the new network
+  .PARAMETER type
+  The type of the new network. Valid types are 'wireless' (for MR), 'switch' (for MS), 'appliance' (for MX or Z1), 'phone' (for MC).
+  .PARAMETER tags
+  A space-separated list of tags to be applied to the network
+  .PARAMETER timeZone
+  The timezone of the network. For a list of allowed timezones, please see the 'TZ' column in the table in this article.
+  https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+  #>
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key,        
@@ -499,7 +516,10 @@ function New-MerakiNetwork {
         [Parameter(Mandatory=$false)]
         [String]$tags,
         [Parameter(Mandatory=$false)]
-        [String]$ServerID
+        [String]$ServerID,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("US/Pacific","Europe/Amsterdam","America/Los_Angeles", IgnoreCase = $False)]
+        [String]$timeZone
 
     )
 
@@ -513,35 +533,23 @@ If (!$ServerID) {
 
     $ConvertedType = $Type.ToLower()
 
-if (!$tags){
+$Object = New-Object PSObject
 
-$json = @"
-
-
-{
-"name":"$new_name",
-"type": "$ConvertedType",
-"tags": "",
-"timeZone": "Europe/Amsterdam"
+if ($new_name) {
+ $Object | Add-Member NoteProperty name $new_name
+}
+if ($type) {
+  $Object | Add-Member NoteProperty type $ConvertedType
+}
+if ($timeZone) {
+  $Object | Add-Member NoteProperty timeZone $timeZone
+}
+if ($tags) {
+  $Object | Add-Member NoteProperty tags $tags
 }
 
-"@
-}
-else {
 
-$json = @"
-
-
-{
-"name":"$new_name",
-"type":  "$ConvertedType",
-"tags": "$tags"
-"timeZone": "Europe/Amsterdam"
-}
-
-"@
-
-}
+$json = $Object | ConvertTo-Json
 
     $api = @{
 
@@ -768,7 +776,6 @@ if ($stpGuard) {
 }
 
     $json = $Object | ConvertTo-Json
-    Write-Output $json
 
 $switch = Get-MerakiSwitches -api_key $api_key -networkid $networkid | where {$_.name -eq $switchName}
 
