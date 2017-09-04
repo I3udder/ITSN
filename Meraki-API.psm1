@@ -565,6 +565,18 @@ $json = @"
 
 function New-MerakiLicense {
 
+ <#
+  .SYNOPSIS
+  This function claims a device, license key, or order into an organization.
+  .DESCRIPTION
+  When claiming by order, all devices and licenses in the order will be claimed; 
+  licenses will be added to the organization and devices will be placed in the organization's inventory. 
+  These three types of claims are mutually exclusive and cannot be performed in one request.
+
+  Either 'renew' or 'addDevices'. 'addDevices' will increase the license limit, while 'renew' will extend the amount of time until expiration. 
+  This parameter is required when claiming by licenseKey
+  #>
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key,        
@@ -653,6 +665,7 @@ function Set-MerakiSwitchPort {
   This function configures a switch port on a Meraki Switch
   .DESCRIPTION
   This function tries to get the serial number of the defined switch. With that serial number and the parameters supplied the command updates the switch port configuration.
+  Only the values that are set will be configured on the port.
   #>
 
     Param (
