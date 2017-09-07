@@ -1,4 +1,18 @@
-﻿function Get-MerakiSwitches {
+﻿function Get-MerakiDevices {
+
+<#
+  .SYNOPSIS
+  This function displays the Meraki Devices in a network.
+  .DESCRIPTION
+  This function displays the Meraki Devices in a network. With the Where-Object Pipe you can filter for specific devices.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER networkID
+  This parameter is required so the correct network is chosen for the SET or GET information
+  .EXAMPLE
+  Get-MerakiAPs -api_key <api_key> -NetworkID <networkID> | Where-Object {$_.model -like "MS*"}
+
+  #>
 
     Param (
         [Parameter(Mandatory=$true)]
@@ -26,63 +40,6 @@
 
 }
 
-function Get-MerakiAPs {
-
-    Param (
-        [Parameter(Mandatory=$true)]
-        [String]$api_key,        
-        [Parameter(Mandatory=$true)]
-        [String]$NetworkID
-    )
-
-    $api = @{
-
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
-    }
-
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = "/networks/"+ $networkid +"/devices"
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
-
-}
-
-function Get-MerakiAppliances {
-
-    Param (
-        [Parameter(Mandatory=$true)]
-        [String]$api_key,        
-        [Parameter(Mandatory=$true)]
-        [String]$NetworkID
-    )
-
-    $api = @{
-
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
-    }
-
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = "/networks/"+ $networkid +"/devices"
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
-
-}
 
 function Get-MerakiVPN {
 
@@ -183,7 +140,7 @@ function Get-MerakiSwitchPorts {
 
     #Useage: Get-MerakiSwitchPorts "SW01"
 
-    $switch = Get-MerakiSwitches -api_key $api_key -networkid $networkid | where {$_.name -eq $switch_name}
+    $switch = Get-MerakiDevices -api_key $api_key -networkid $networkid | where {$_.name -eq $switch_name}
 
     if ($switch){
 
@@ -602,6 +559,7 @@ function New-MerakiLicense {
   This parameter is required so the correct organization is chosen for the SET or GET information
   .PARAMETER ServerID
   This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
+  The command Get-MerakiRedirectedUrl can get the ServerID
   #>
 
     Param (
@@ -697,10 +655,11 @@ function Set-MerakiSwitchPort {
   This parameter is required. It is a user specific key used to SET or GET information
   .PARAMETER OrganizationID
   This parameter is required so the correct organization is chosen for the SET or GET information
-  .PARAMETER ServerID
-  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
   .PARAMETER networkID
   This parameter is required so the correct network is chosen for the SET or GET information
+  .PARAMETER ServerID
+  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
+  The command Get-MerakiRedirectedUrl can get the ServerID
   #>
 
     Param (
@@ -804,7 +763,7 @@ if ($stpGuard) {
 
     $json = $Object | ConvertTo-Json
 
-$switch = Get-MerakiSwitches -api_key $api_key -networkid $networkid | where {$_.name -eq $switchName}
+$switch = Get-MerakiDevices -api_key $api_key -networkid $networkid | where {$_.name -eq $switchName}
 
 if ($switch){ 
 
@@ -831,5 +790,45 @@ if ($switch){
         Write-Host "Switch doesn't exist." -ForegroundColor Red
     
     }
+
+}
+
+function Get-MerakiAdministrators {
+
+<#
+  .SYNOPSIS
+  This function displays the Meraki Administrators
+  .DESCRIPTION
+  This function displays the Meraki Administrators with the assigned rights.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+
+  #>
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api = @{
+
+        "endpoint" = 'https://dashboard.meraki.com/api/v0'
+    
+    }
+    $api.url = "/organizations/"+ $OrganizationID +"/admins" 
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+    return $request
 
 }
