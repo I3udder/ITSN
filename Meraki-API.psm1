@@ -43,6 +43,18 @@
 
 function Get-MerakiVPN {
 
+<#
+  .SYNOPSIS
+  This function displays the Meraki VPN connections.
+  .DESCRIPTION
+  This function displays the Meraki VPN connections.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  
+  #>
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key,        
@@ -71,6 +83,18 @@ function Get-MerakiVPN {
 }
 
 function Get-MerakiNetworks {
+
+<#
+  .SYNOPSIS
+  This function displays the Meraki Networks.
+  .DESCRIPTION
+  This function displays the Meraki Networks.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  
+  #>
 
     Param (
         [Parameter(Mandatory=$true)]
@@ -101,6 +125,16 @@ function Get-MerakiNetworks {
 
 function Get-MerakiOrganizations {
 
+<#
+  .SYNOPSIS
+  This function displays the Meraki Organizations.
+  .DESCRIPTION
+  This function displays the Meraki Organizations.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+    
+  #>
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key
@@ -128,6 +162,21 @@ function Get-MerakiOrganizations {
 
 function Get-MerakiSwitchPorts {
 
+<#
+  .SYNOPSIS
+  This function displays Meraki Switch ports from a specified switch.
+  .DESCRIPTION
+  This function displays Meraki Switch ports from a specified switch.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER networkID
+  This parameter is required so the correct network is chosen for the SET or GET information
+  .PARAMETER switch_name
+  This parameter is required so the correct switch is queried for the ports
+  .EXAMPLE
+  Get-MerakiSwitchPorts -api_key <api_key> -NetworkID <networkID> -switch_name <switch_name>   
+  #>
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key,        
@@ -138,7 +187,7 @@ function Get-MerakiSwitchPorts {
     )
 
 
-    #Useage: Get-MerakiSwitchPorts "SW01"
+    #Call function Get-MerakiDevices for the correct serial number of the switch
 
     $switch = Get-MerakiDevices -api_key $api_key -networkid $networkid | where {$_.name -eq $switch_name}
 
