@@ -259,14 +259,13 @@ If (!$ServerID) {
     $endpoint = $ServerID
     }
 
-$json = @"
+$Object = New-Object PSObject
 
-
-{
-"name":"$new_name"
+if ($new_name) {
+  $Object | Add-Member NoteProperty name $new_name
 }
 
-"@
+$json = $Object | ConvertTo-Json
 
 
     $api = @{
@@ -340,14 +339,13 @@ If (!$ServerID) {
     $endpoint = $ServerID
     }
 
-$json = @"
+$Object = New-Object PSObject
 
-
-{
-"name":"$new_name"
+if ($new_name) {
+  $Object | Add-Member NoteProperty name $new_name
 }
 
-"@
+$json = $Object | ConvertTo-Json
 
 
     $api = @{
@@ -423,15 +421,16 @@ If (!$ServerID) {
     $endpoint = $ServerID
     }
 
-$json = @"
+$Object = New-Object PSObject
 
-
-{
-"id": $OrganizationID,
-"name":"$new_name"
+if ($OrganizationID) {
+ $Object | Add-Member NoteProperty id $OrganizationID
+}
+if ($new_name) {
+  $Object | Add-Member NoteProperty name $new_name
 }
 
-"@
+$json = $Object | ConvertTo-Json
 
 
     $api = @{
@@ -500,7 +499,12 @@ function New-MerakiNetwork {
   .PARAMETER timeZone
   The timezone of the network. For a list of allowed timezones, please see the 'TZ' column in the table in this article.
   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  .PARAMETER ServerID
+  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
   #>
 
     Param (
@@ -583,6 +587,21 @@ function New-MerakiLicense {
 
   Either 'renew' or 'addDevices'. 'addDevices' will increase the license limit, while 'renew' will extend the amount of time until expiration. 
   This parameter is required when claiming by licenseKey
+  .PARAMETER order
+  The order number that should be claimed
+  .PARAMETER serial
+  The serial of the device that should be claimed
+  .PARAMETER licenseKey
+  The license key that should be claimed
+  .PARAMETER licenseMode
+  Either 'renew' or 'addDevices'. 'addDevices' will increase the license limit, while 'renew' will extend the amount of time until expiration. 
+  This parameter is required when claiming by licenseKey.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  .PARAMETER ServerID
+  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
   #>
 
     Param (
@@ -674,6 +693,14 @@ function Set-MerakiSwitchPort {
   .DESCRIPTION
   This function tries to get the serial number of the defined switch. With that serial number and the parameters supplied the command updates the switch port configuration.
   Only the values that are set will be configured on the port.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  .PARAMETER ServerID
+  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
+  .PARAMETER networkID
+  This parameter is required so the correct network is chosen for the SET or GET information
   #>
 
     Param (
