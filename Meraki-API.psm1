@@ -695,11 +695,11 @@ $json = @"
 function Set-MerakiSwitchPort {
 
  <#
+  
   .SYNOPSIS
   This function configures a switch port on a Meraki Switch
   .DESCRIPTION
-  This function tries to get the serial number of the defined switch. With that serial number and the parameters supplied the command updates the switch port configuration.
-  Only the values that are set will be configured on the port.
+  This function tries to get the serial number of the defined switch. With that serial number and the parameters supplied the command updates the switch port configuration. Only the values that are set will be configured on the port
   .PARAMETER api_key
   This parameter is required. It is a user specific key used to SET or GET information
   .PARAMETER OrganizationID
@@ -709,6 +709,33 @@ function Set-MerakiSwitchPort {
   .PARAMETER ServerID
   This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
   The command Get-MerakiRedirectedUrl can get the ServerID
+  .PARAMETER switchName
+  This parameter is required so the correct switch is chosen
+  .PARAMETER PortNumber
+  This parameter is required in combination wit switchName to update the correct port on the switch
+  .PARAMATER Name
+  This parameter is optional for setting a new name to the port
+  .PARAMETER enabled
+  This parameter is optional for setting the state of the port to enabeled or disabled.
+  .PARAMETER poeEnabled
+  This parameter is optional for setting the PoE stat to enabled or disabled
+  .PARAMETER tags
+  This parameter is optional for grouping ports with tags. Multiple tags can be assigned separated by spaces
+  .PARAMETER type
+  This parameter is optional, but limited to the values access or trunk for setting the port type
+  .PARAMETER vlan
+  This parameter is optional for setting the native vlan of a port
+  .PARAMETER voiceVlan
+  This parameter is optional for setting the voice vlan which is advertised by LLDP
+  .PARAMETER allowedVlans
+  This parameter is optional for setting the allowed vlan list. Vlans are separated by comma. Also the value all can be used for allowing all vlans
+  .PARAMETER isolationEnabled
+  This parameter is optional for setting the port isolation. This prevents the port to communicated with other specified ports
+  .PARAMETER rstpEnabled
+  This parameter is optional for setting the Spanning-Tree status to enabled of disabled
+  .PARAMETER stpGuard
+  This parameter is optional but limited by the choices disabled, Root guard or BPDU guard. This enables protection for the STP mechanism
+
   #>
 
     Param (
