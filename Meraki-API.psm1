@@ -377,6 +377,19 @@ $json = $Object | ConvertTo-Json
 
 function Get-MerakiSSID {
 
+ <#
+  
+  .SYNOPSIS
+  This function gets the SSID information on a network
+  .DESCRIPTION
+  This function gets the SSID information on a network
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER networkID
+  This parameter is required so the correct network is chosen for the SET or GET information
+
+#>
+
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key,        
@@ -406,6 +419,20 @@ function Get-MerakiSSID {
  
  Function Set-MerakiOrganization {
 
+  <#
+  .SYNOPSIS
+  This function edits an organization
+  .DESCRIPTION
+  This function adits an organization
+  .PARAMETER new_name
+  The name of the organization
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  .PARAMETER ServerID
+  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
+  #>
 
 Param (
         [Parameter(Mandatory=$true)]
@@ -461,6 +488,17 @@ $json = $Object | ConvertTo-Json
 
 function Get-MerakiInventory {
 
+ <#
+  .SYNOPSIS
+  This function gets the Meraki inventory for an organization
+  .DESCRIPTION
+  This function gets the Meraki inventory for an organization
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+  #>
+  
     Param (
         [Parameter(Mandatory=$true)]
         [String]$api_key,        
@@ -713,7 +751,7 @@ function Set-MerakiSwitchPort {
   This parameter is required so the correct switch is chosen
   .PARAMETER PortNumber
   This parameter is required in combination wit switchName to update the correct port on the switch
-  .PARAMATER Name
+  .PARAMETER Name
   This parameter is optional for setting a new name to the port
   .PARAMETER enabled
   This parameter is optional for setting the state of the port to enabeled or disabled.
