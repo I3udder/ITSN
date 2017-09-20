@@ -946,3 +946,43 @@ function Get-MerakiAdministrators {
     return $request
 
 }
+
+function Get-MerakiSNMP {
+
+<#
+  .SYNOPSIS
+  This function displays the Meraki Organization SNMP settings.
+  .DESCRIPTION
+  This function displays the Meraki Organization SNMP settings.
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+
+  #>
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,        
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID
+    )
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api = @{
+
+        "endpoint" = 'https://dashboard.meraki.com/api/v0'
+    
+    }
+    $api.url = "/organizations/"+ $OrganizationID +"/snmp" 
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+    return $request
+
+}
