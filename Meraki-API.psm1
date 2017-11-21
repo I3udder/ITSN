@@ -986,3 +986,152 @@ function Get-MerakiSNMP {
     return $request
 
 }
+
+function Set-MerakiSSID {
+
+ <#
+  
+  .SYNOPSIS
+  This function configures a switch port on a Meraki Switch
+  .DESCRIPTION
+  This function tries to get the serial number of the defined switch. With that serial number and the parameters supplied the command updates the switch port configuration. Only the values that are set will be configured on the port
+  .PARAMETER api_key
+  This parameter is required. It is a user specific key used to SET or GET information
+  .PARAMETER networkID
+  This parameter is required so the correct network is chosen for the SET or GET information
+  .PARAMETER ServerID
+  This parameter speeds up the process of information, because a crutial process is not needed te retreive the Rederict URL from dashboard.meraki.com
+  The command Get-MerakiRedirectedUrl can get the ServerID
+  .PARAMETER OrganizationID
+  This parameter is required so the correct organization is chosen for the SET or GET information
+
+  #>
+
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]$api_key,
+        [Parameter(Mandatory=$true)]
+        [String]$OrganizationID,   
+        [Parameter(Mandatory=$true)]
+        [String]$networkID,
+        [Parameter(Mandatory=$false)]
+        [String]$ServerID,
+        [Parameter(Mandatory=$True)]
+        [String]$Number,
+        [Parameter(Mandatory=$True)]
+        [String]$Name,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$enabled,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("open","psk","open-with-radius","8021x-meraki","8021x-radius", IgnoreCase=$false)]
+        [String]$authMode,
+        [Parameter(Mandatory=$False)]
+        [ValidateSet("wpa","wep","wpa-eap", IgnoreCase=$false)]
+        [String]$encryptionMode,
+        [Parameter(Mandatory=$false)]
+        [String]$psk,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("None","Click-through splash page","Billing","Password-protected with Meraki RADIUS","Password-protected with custom RADIUS","Password-protected with Active Directory","Password-protected with LDAP","SMS authentication","Systems Manager Sentry","Facebook Wi-Fi", IgnoreCase=$false)]
+        [String]$splashPage,
+        [Parameter(Mandatory=$false)]
+        [String]$radiusServersHost,
+        [Parameter(Mandatory=$false)]
+        [String]$radiusServersPort,
+        [Parameter(Mandatory=$false)]
+        [String]$radiusServersSecret,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$radiusCoaEnabled,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet($true,$false)]
+        [String]$radiusAccountingEnabled
+    )
+
+If (!$ServerID) {
+    $shard = Get-MerakiRedirectedUrl -api_key $api_key -OrganizationID $OrganizationID
+    $endpoint = $shard.Substring(8,4)
+    }
+    else {
+    $endpoint = $ServerID
+    }
+
+$Object = New-Object PSObject
+
+if ($name) {
+ $Object | Add-Member NoteProperty name $Name
+}
+if ($tags) {
+ $Object | Add-Member NoteProperty tags $tags
+}
+if ($enabled -eq $true) {
+ $Object | Add-Member NoteProperty enabled $true
+} 
+if ($enabled -eq $false) {
+ $Object | Add-Member NoteProperty enabled $false
+}
+if ($type) {
+  $Object | Add-Member NoteProperty type $type
+}
+if ($vlan) {
+  $Object | Add-Member NoteProperty vlan $vlan
+}
+if ($voiceVlan) {
+  $Object | Add-Member NoteProperty voiceVlan $voiceVlan
+}
+if ($allowedVlans) {
+  $Object | Add-Member NoteProperty allowedVlans $allowedVlans
+}
+if ($poeEnabled -eq $true) {
+ $Object | Add-Member NoteProperty poeEnabled $true
+} 
+if ($poeEnabled -eq $false) {
+ $Object | Add-Member NoteProperty poeEnabled $false
+}
+if ($isolationEnabled -eq $true) {
+ $Object | Add-Member NoteProperty isolationEnabled $true
+} 
+if ($isolationEnabled -eq $false) {
+ $Object | Add-Member NoteProperty isolationEnabled $false
+}
+if ($rstpEnabled -eq $true) {
+ $Object | Add-Member NoteProperty rstpEnabled $true
+} 
+if ($rstpEnabled -eq $false) {
+ $Object | Add-Member NoteProperty rstEnabled $false
+}
+if ($stpGuard) {
+  $Object | Add-Member NoteProperty stpGuard $stpGuard
+}
+
+    $json = $Object | ConvertTo-Json
+
+$switch = Get-MerakiDevices -api_key $api_key -networkid $networkid | where {$_.name -eq $switchName}
+
+if ($switch){ 
+
+    $api = @{
+
+        "endpoint" = "https://"+ $endpoint +".meraki.com/api/v0"
+    
+    }
+
+    $header = @{
+        
+        "X-Cisco-Meraki-API-Key" = $api_key
+        "Content-Type" = 'application/json'
+        
+    }
+
+    $api.url = "/devices/" + $switch.serial + "/switchPorts/"+ $PortNumber
+    $uri = $api.endpoint + $api.url
+    $request = Invoke-RestMethod -Method Put -Uri $uri -Headers $header -Body $json -Verbose
+    return $request
+    }
+    else{
+
+        Write-Host "Switch doesn't exist." -ForegroundColor Red
+    
+    }
+
+}
